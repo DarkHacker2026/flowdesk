@@ -235,9 +235,9 @@
 
         // Seed initial tasks if empty
         if (TaskManager.getAll().length === 0) {
-            TaskManager.add({ title: 'Fix login bug', description: 'Users cannot log in via SSO.', status: 'todo', priority: 'high', aiScore: 0, tags: ['bug', 'auth'] });
-            TaskManager.add({ title: 'Write API docs', description: 'Document the new v2 endpoints.', status: 'in-progress', priority: 'medium', aiScore: 0, tags: ['docs'] });
-            TaskManager.add({ title: 'Update landing page copy', description: 'Change H1 to be more action-oriented.', status: 'todo', priority: 'low', aiScore: 0, tags: ['marketing'] });
+            TaskManager.add({ title: 'Fix login bug', description: 'Users cannot log in via SSO.', status: 'todo', priority: 'high', aiScore: 88, tags: ['bug', 'auth'] });
+            TaskManager.add({ title: 'Write API docs', description: 'Document the new v2 endpoints.', status: 'in-progress', priority: 'medium', aiScore: 55, tags: ['docs'] });
+            TaskManager.add({ title: 'Update landing page copy', description: 'Change H1 to be more action-oriented.', status: 'todo', priority: 'low', aiScore: 25, tags: ['marketing'] });
         }
 
         // Groq AI Integration
@@ -264,7 +264,7 @@
                             },
                             {
                                 role: 'user',
-                                content: `Task: ${title}\\nDescription: ${description || 'No description provided'}\\nAssign a priority and urgency score.`
+                                content: `Task: ${title}\nDescription: ${description || 'No description provided'}\nAssign a priority and urgency score.`
                             }
                         ]
                     })
@@ -369,22 +369,22 @@
                 div.draggable = true;
                 div.ondragstart = (e) => e.dataTransfer.setData('text/plain', task.id);
 
-                div.innerHTML = \`
+                div.innerHTML = `
                     <div class="flex justify-between items-start mb-2">
-                        <h4 class="font-semibold text-gray-200 text-sm break-words">\${escapeHTML(task.title)}</h4>
+                        <h4 class="font-semibold text-gray-200 text-sm break-words">${escapeHTML(task.title)}</h4>
                     </div>
-                    \${task.description ? \`<p class="text-xs text-muted mb-3 line-clamp-2 overflow-hidden text-ellipsis">\${escapeHTML(task.description)}</p>\` : ''}
+                    ${task.description ? `<p class="text-xs text-muted mb-3 line-clamp-2 overflow-hidden text-ellipsis">${escapeHTML(task.description)}</p>` : ''}
                     <div class="flex flex-wrap gap-2 mb-3 items-center">
-                        <span class="px-2 py-0.5 rounded text-xs font-medium \${badgeColor}">\${task.priority}</span>
-                        \${task.aiScore > 0 ? \`<span class="px-2 py-0.5 rounded text-xs font-medium bg-violet-900 text-violet-300">AI \${task.aiScore}</span>\` : ''}
-                        \${tagsHtml}
+                        <span class="px-2 py-0.5 rounded text-xs font-medium ${badgeColor}">${task.priority}</span>
+                        ${task.aiScore > 0 ? `<span class="px-2 py-0.5 rounded text-xs font-medium bg-violet-900 text-violet-300">AI ${task.aiScore}</span>` : ''}
+                        ${tagsHtml}
                     </div>
                     <div class="flex justify-between items-center pt-2 border-t border-[#2e2e3a] gap-1">
-                        <button onclick="moveTask('\${task.id}', '\${getPrevStatus(task.status)}')" class="hover-btn text-xs text-muted hover:text-white px-2 py-1 bg-[#2e2e3a] rounded \${task.status === 'todo' ? 'invisible' : ''}">← Move</button>
-                        <button onclick="deleteTask('\${task.id}')" class="hover-btn text-xs text-red-400 hover:text-red-300 px-2 py-1 bg-[#2e2e3a] rounded">🗑 Delete</button>
-                        <button onclick="moveTask('\${task.id}', '\${getNextStatus(task.status)}')" class="hover-btn text-xs text-muted hover:text-white px-2 py-1 bg-[#2e2e3a] rounded \${task.status === 'done' ? 'invisible' : ''}">Move →</button>
+                        <button onclick="moveTask('${task.id}', '${getPrevStatus(task.status)}')" class="hover-btn text-xs text-muted hover:text-white px-2 py-1 bg-[#2e2e3a] rounded ${task.status === 'todo' ? 'invisible' : ''}">← Move</button>
+                        <button onclick="deleteTask('${task.id}')" class="hover-btn text-xs text-red-400 hover:text-red-300 px-2 py-1 bg-[#2e2e3a] rounded">🗑 Delete</button>
+                        <button onclick="moveTask('${task.id}', '${getNextStatus(task.status)}')" class="hover-btn text-xs text-muted hover:text-white px-2 py-1 bg-[#2e2e3a] rounded ${task.status === 'done' ? 'invisible' : ''}">Move →</button>
                     </div>
-                \`;
+                `;
                 el.appendChild(div);
             });
         }
@@ -502,7 +502,7 @@
             if (res) {
                 DOM.inputPriority.value = res.priority;
                 currentAiScore = res.score;
-                DOM.aiResult.innerHTML = \`<span class="text-violet-400 font-medium">AI Score: \${res.score}</span><br>\${escapeHTML(res.reason)}\`;
+                DOM.aiResult.innerHTML = `<span class="text-violet-400 font-medium">AI Score: ${res.score}</span><br>${escapeHTML(res.reason)}`;
                 DOM.aiResult.classList.remove('hidden');
             }
         };
@@ -561,7 +561,7 @@
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': `Bearer \${key}`
+                        'Authorization': `Bearer ${key}`
                     },
                     body: JSON.stringify({
                         model: 'llama-3.1-8b-instant',
@@ -573,7 +573,7 @@
                             },
                             {
                                 role: 'user',
-                                content: \`My tasks: \${JSON.stringify(tasks)}. What should I focus on today?\`
+                                content: `My tasks: ${JSON.stringify(tasks)}. What should I focus on today?`
                             }
                         ]
                     })
@@ -581,12 +581,12 @@
                 const data = await res.json();
                 const text = data.choices[0].message.content.trim();
                 
-                const bullets = text.split('\\n').filter(l => l.trim());
+                const bullets = text.split('\n').filter(l => l.trim());
                 
                 DOM.aiLoading.classList.add('hidden');
                 DOM.aiResults.innerHTML = bullets.map(b => {
-                    const clean = escapeHTML(b.replace(/^[•\\-\\*]\\s*/, '').trim());
-                    return \`<div class="bg-[#2e2e3a] p-3 rounded border-l-4 border-violet-500 text-sm">\${clean}</div>\`;
+                    const clean = escapeHTML(b.replace(/^[•\-\*]\s*/, '').trim());
+                    return `<div class="bg-[#2e2e3a] p-3 rounded border-l-4 border-violet-500 text-sm">${clean}</div>`;
                 }).join('');
 
             } catch (e) {
