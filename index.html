@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FlowDesk</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background-color: #0f0f11; color: #e8e8ea; font-family: system-ui, -apple-system, sans-serif; }
+        .card-bg { background-color: #1c1c24; border-color: #2e2e3a; }
+        .focus-ring { outline: none; border-color: #7c3aed; box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.3); }
+        .tag-pill { background-color: #334155; } /* slate-700 */
+        .text-muted { color: #6b7280; }
+        .accent-violet { color: #7c3aed; }
+        .accent-violet-border { border-color: #7c3aed; }
+        .hover-btn { transition: transform 0.1s ease, background-color 0.2s ease; cursor: pointer; }
+        .hover-btn:active { transform: scale(0.95); }
+        .modal-overlay { background-color: rgba(0, 0, 0, 0.5); }
+        .slide-panel { transition: transform 0.3s ease; transform: translateX(100%); }
+        .slide-panel.open { transform: translateX(0); }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(4px); }
+            to { opacity: 1; transform: none; }
+        }
+        .task-card {
+            animation: fadeIn 0.15s ease;
+        }
+
+        @keyframes pulseEmpty {
+            0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(124, 58, 237, 0.7); }
+            50% { transform: scale(1.05); box-shadow: 0 0 0 10px rgba(124, 58, 237, 0); }
+        }
+        .pulse-add { animation: pulseEmpty 2s infinite; }
+        
+        /* Drag styles */
+        .col-dropzone.drag-over {
+            border: 2px dashed #a78bfa; /* violet-400 */
+            background-color: rgba(28, 28, 36, 0.8);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <!-- Navbar -->
+    <nav class="flex items-center justify-between px-6 py-4 border-b border-[#2e2e3a] bg-[#1c1c24]">
+        <div class="text-2xl font-bold text-violet-600">FlowDesk</div>
+        <div class="flex items-center gap-4">
+            <button id="ask-ai-btn" class="hover-btn bg-violet-600 hover:bg-violet-700 text-white px-4 py-2 rounded-md font-medium text-sm flex items-center gap-2">
+                <span>Ask AI ✨</span>
+            </button>
+            <button id="settings-btn" class="hover-btn text-gray-400 hover:text-white p-2">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Stats Bar -->
+    <div class="px-6 py-3 border-b border-[#2e2e3a] flex gap-3 text-sm flex-wrap overflow-x-auto">
+        <div class="bg-slate-700 px-3 py-1 rounded-full whitespace-nowrap">Total Tasks: <span id="stat-total" class="font-bold">0</span></div>
+        <div class="bg-amber-900 text-amber-300 px-3 py-1 rounded-full whitespace-nowrap">In Progress: <span id="stat-in-progress" class="font-bold">0</span></div>
+        <div class="bg-emerald-900 text-emerald-300 px-3 py-1 rounded-full whitespace-nowrap">Done: <span id="stat-done" class="font-bold">0</span></div>
+        <div class="bg-violet-900 text-violet-300 px-3 py-1 rounded-full whitespace-nowrap">Avg AI Score: <span id="stat-ai" class="font-bold">—</span></div>
+    </div>
+
+    <!-- Board -->
+    <main class="flex-1 overflow-x-auto p-6 flex flex-col md:flex-row gap-6 relative">
+        <!-- Todo Column -->
+        <div class="flex-1 min-w-[300px] flex flex-col">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="font-bold text-lg text-gray-200">To Do <span class="text-sm font-normal text-muted ml-2" id="count-todo"></span></h2>
+            </div>
+            <div id="col-todo" class="flex-1 col-dropzone rounded-lg min-h-[150px] p-2 -mx-2 transition-colors border-2 border-transparent" ondragover="allowDrop(event)" ondrop="handleDrop(event, 'todo')" ondragenter="dragEnter(event)" ondragleave="dragLeave(event)">
+                <!-- tasks -->
+            </div>
+        </div>
+
+        <!-- In Progress Column -->
+        <div class="flex-1 min-w-[300px] flex flex-col">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="font-bold text-lg text-gray-200">In Progress <span class="text-sm font-normal text-muted ml-2" id="count-in-progress"></span></h2>
+            </div>
+            <div id="col-in-progress" class="flex-1 col-dropzone rounded-lg min-h-[150px] p-2 -mx-2 transition-colors border-2 border-transparent" ondragover="allowDrop(event)" ondrop="handleDrop(event, 'in-progress')" ondragenter="dragEnter(event)" ondragleave="dragLeave(event)">
+                <!-- tasks -->
+            </div>
+        </div>
+
+        <!-- Done Column -->
+        <div class="flex-1 min-w-[300px] flex flex-col">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="font-bold text-lg text-gray-200">Done <span class="text-sm font-normal text-muted ml-2" id="count-done"></span></h2>
+            </div>
+            <div id="col-done" class="flex-1 col-dropzone rounded-lg min-h-[150px] p-2 -mx-2 transition-colors border-2 border-transparent" ondragover="allowDrop(event)" ondrop="handleDrop(event, 'done')" ondragenter="dragEnter(event)" ondragleave="dragLeave(event)">
+                <!-- tasks -->
+            </div>
+        </div>
+
+        <!-- Floating Action Button -->
+        <button id="add-task-btn" class="hover-btn fixed bottom-8 right-8 bg-violet-600 hover:bg-violet-700 text-white w-14 h-14 rounded-full shadow-lg flex items-center justify-center text-3xl z-40">
+            +
+        </button>
+    </main>
+
+    <!-- Modals -->
+
+    <!-- Add Task Modal -->
+    <div id="modal-add-task" class="fixed inset-0 modal-overlay hidden z-50 flex items-center justify-center p-4">
+        <div class="card-bg rounded-xl p-6 w-full max-w-md border shadow-2xl relative">
+            <h3 class="text-xl font-bold mb-4">Add Task</h3>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium mb-1">Title *</label>
+                    <input type="text" id="task-title" class="w-full bg-[#0f0f11] border border-[#2e2e3a] rounded p-2 text-white focus:focus-ring" placeholder="E.g., Fix login bug">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-1">Description</label>
+                    <textarea id="task-desc" class="w-full bg-[#0f0f11] border border-[#2e2e3a] rounded p-2 text-white focus:focus-ring min-h-[80px]"></textarea>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-1">Tags</label>
+                    <input type="text" id="task-tags" class="w-full bg-[#0f0f11] border border-[#2e2e3a] rounded p-2 text-white focus:focus-ring" placeholder="bug, frontend, urgent">
+                </div>
+                <div class="flex gap-4">
+                    <div class="flex-1">
+                        <label class="block text-sm font-medium mb-1">Priority</label>
+                        <select id="task-priority" class="w-full bg-[#0f0f11] border border-[#2e2e3a] rounded p-2 text-white focus:focus-ring appearance-none">
+                            <option value="low">Low</option>
+                            <option value="medium" selected>Medium</option>
+                            <option value="high">High</option>
+                            <option value="critical">Critical</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="pt-2 border-t border-[#2e2e3a]">
+                    <button type="button" id="btn-score-ai" class="w-full py-2 bg-[#2e2e3a] hover:bg-[#3f3f4e] text-violet-400 font-medium rounded transition-colors flex justify-center items-center gap-2">
+                        <span>Score with AI ✨</span>
+                    </button>
+                    <div id="ai-score-result" class="text-sm mt-2 text-center text-muted hidden">
+                        <!-- AI Result goes here -->
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex justify-end gap-3 mt-6 pt-4 border-t border-[#2e2e3a]">
+                <button type="button" id="btn-cancel-task" class="px-4 py-2 text-gray-400 hover:text-white transition-colors">Cancel</button>
+                <button type="button" id="btn-save-task" class="hover-btn px-4 py-2 bg-violet-600 hover:bg-violet-700 text-white rounded font-medium">Add Task</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="modal-settings" class="fixed inset-0 modal-overlay hidden z-50 flex items-center justify-center p-4">
+        <div class="card-bg rounded-xl p-6 w-full max-w-md border shadow-2xl relative">
+            <h3 class="text-xl font-bold mb-4">Settings</h3>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium mb-1">Groq API Key</label>
+                    <input type="password" id="groq-key" class="w-full bg-[#0f0f11] border border-[#2e2e3a] rounded p-2 text-white focus:focus-ring" placeholder="gsk_xxxxx">
+                    <p class="text-xs text-muted mt-1">Free key at <a href="https://console.groq.com" target="_blank" class="text-violet-400 hover:underline">console.groq.com</a> — no credit card needed</p>
+                </div>
+                
+                <div class="flex gap-3">
+                    <button type="button" id="btn-save-key" class="hover-btn flex-1 py-2 bg-violet-600 hover:bg-violet-700 text-white rounded font-medium">Save Key</button>
+                    <button type="button" id="btn-clear-key" class="hover-btn flex-1 py-2 bg-[#2e2e3a] hover:bg-[#3f3f4e] text-white rounded font-medium">Clear Key</button>
+                </div>
+
+                <div id="key-status" class="text-sm font-medium text-center py-2 rounded">
+                    <!-- Status here -->
+                </div>
+            </div>
+
+            <div class="absolute top-4 right-4">
+                <button id="btn-close-settings" class="text-gray-400 hover:text-white p-1">✕</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI Focus Panel -->
+    <div id="ai-panel" class="fixed top-0 right-0 h-full w-[300px] bg-[#1c1c24] border-l border-[#2e2e3a] shadow-2xl slide-panel z-50 flex flex-col">
+        <div class="p-4 border-b border-[#2e2e3a] flex justify-between items-center bg-[#0f0f11]">
+            <h3 class="font-bold text-violet-400 flex items-center gap-2">✨ AI Focus</h3>
+            <button id="btn-close-ai" class="text-gray-400 hover:text-white">✕</button>
+        </div>
+        <div class="p-4 flex-1 overflow-y-auto" id="ai-panel-content">
+            <!-- Content -->
+            <div id="ai-loading" class="hidden flex flex-col items-center justify-center py-10 text-muted">
+                <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-violet-600 mb-4"></div>
+                <p>Analyzing tasks...</p>
+            </div>
+            <div id="ai-results" class="space-y-3">
+                <p class="text-muted text-sm text-center py-10">Click 'Ask AI' to get prioritized focus areas.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Data Model
+        const TaskManager = {
+            getAll() {
+                const data = localStorage.getItem('flowdesk_tasks');
+                return data ? JSON.parse(data) : [];
+            },
+            save(tasks) {
+                localStorage.setItem('flowdesk_tasks', JSON.stringify(tasks));
+            },
+            add(task) {
+                const tasks = this.getAll();
+                tasks.push({
+                    id: Date.now().toString(),
+                    createdAt: Date.now(),
+                    ...task
+                });
+                this.save(tasks);
+            },
+            update(id, changes) {
+                const tasks = this.getAll();
+                const index = tasks.findIndex(t => t.id === id);
+                if (index !== -1) {
+                    tasks[index] = { ...tasks[index], ...changes };
+                    this.save(tasks);
+                }
+            },
+            delete(id) {
+                let tasks = this.getAll();
+                tasks = tasks.filter(t => t.id !== id);
+                this.save(tasks);
+            },
+            move(id, newStatus) {
+                this.update(id, { status: newStatus });
+            }
+        };
+
+        // Seed initial tasks if empty
+        if (TaskManager.getAll().length === 0) {
+            TaskManager.add({ title: 'Fix login bug', description: 'Users cannot log in via SSO.', status: 'todo', priority: 'high', aiScore: 0, tags: ['bug', 'auth'] });
+            TaskManager.add({ title: 'Write API docs', description: 'Document the new v2 endpoints.', status: 'in-progress', priority: 'medium', aiScore: 0, tags: ['docs'] });
+            TaskManager.add({ title: 'Update landing page copy', description: 'Change H1 to be more action-oriented.', status: 'todo', priority: 'low', aiScore: 0, tags: ['marketing'] });
+        }
+
+        // Groq AI Integration
+        async function scoreWithAI(title, description) {
+            const key = localStorage.getItem('groq_api_key');
+            if (!key) {
+                alert('Add your free Groq API key in Settings (get one free at console.groq.com)');
+                return null;
+            }
+            try {
+                const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${key}`
+                    },
+                    body: JSON.stringify({
+                        model: 'llama-3.1-8b-instant',
+                        max_tokens: 150,
+                        messages: [
+                            {
+                                role: 'system',
+                                content: 'You are a task prioritization assistant. Respond ONLY with raw JSON, no markdown, no explanation. Format exactly: {"priority":"low|medium|high|critical","score":0-100,"reason":"one short sentence"}'
+                            },
+                            {
+                                role: 'user',
+                                content: `Task: ${title}\\nDescription: ${description || 'No description provided'}\\nAssign a priority and urgency score.`
+                            }
+                        ]
+                    })
+                });
+                const data = await res.json();
+                const text = data.choices[0].message.content.trim();
+                const clean = text.replace(/```json|```/g, '').trim();
+                return JSON.parse(clean);
+            } catch (e) {
+                console.error('Groq AI error:', e);
+                return { priority: 'medium', score: 50, reason: 'Could not analyze — using default' };
+            }
+        }
+
+        // DOM Elements
+        const DOM = {
+            colTodo: document.getElementById('col-todo'),
+            colInProgress: document.getElementById('col-in-progress'),
+            colDone: document.getElementById('col-done'),
+            countTodo: document.getElementById('count-todo'),
+            countInProgress: document.getElementById('count-in-progress'),
+            countDone: document.getElementById('count-done'),
+            btnAdd: document.getElementById('add-task-btn'),
+            
+            modalAdd: document.getElementById('modal-add-task'),
+            btnCancelTask: document.getElementById('btn-cancel-task'),
+            btnSaveTask: document.getElementById('btn-save-task'),
+            btnScoreAI: document.getElementById('btn-score-ai'),
+            inputTitle: document.getElementById('task-title'),
+            inputDesc: document.getElementById('task-desc'),
+            inputTags: document.getElementById('task-tags'),
+            inputPriority: document.getElementById('task-priority'),
+            aiResult: document.getElementById('ai-score-result'),
+
+            modalSettings: document.getElementById('modal-settings'),
+            btnSettings: document.getElementById('settings-btn'),
+            btnCloseSettings: document.getElementById('btn-close-settings'),
+            inputKey: document.getElementById('groq-key'),
+            btnSaveKey: document.getElementById('btn-save-key'),
+            btnClearKey: document.getElementById('btn-clear-key'),
+            keyStatus: document.getElementById('key-status'),
+
+            btnAskAI: document.getElementById('ask-ai-btn'),
+            aiPanel: document.getElementById('ai-panel'),
+            btnCloseAI: document.getElementById('btn-close-ai'),
+            aiLoading: document.getElementById('ai-loading'),
+            aiResults: document.getElementById('ai-results'),
+
+            statTotal: document.getElementById('stat-total'),
+            statInProgress: document.getElementById('stat-in-progress'),
+            statDone: document.getElementById('stat-done'),
+            statAI: document.getElementById('stat-ai')
+        };
+
+        // Current AI score for task being added
+        let currentAiScore = 0;
+
+        // Render Board
+        function renderBoard() {
+            const tasks = TaskManager.getAll();
+            
+            const todo = tasks.filter(t => t.status === 'todo');
+            const inProgress = tasks.filter(t => t.status === 'in-progress');
+            const done = tasks.filter(t => t.status === 'done');
+
+            DOM.countTodo.textContent = todo.length;
+            DOM.countInProgress.textContent = inProgress.length;
+            DOM.countDone.textContent = done.length;
+
+            renderColumn(DOM.colTodo, todo, 'todo');
+            renderColumn(DOM.colInProgress, inProgress, 'in-progress');
+            renderColumn(DOM.colDone, done, 'done');
+
+            updateStats(tasks);
+
+            if (tasks.length === 0) {
+                DOM.btnAdd.classList.add('pulse-add');
+            } else {
+                DOM.btnAdd.classList.remove('pulse-add');
+            }
+        }
+
+        function renderColumn(el, tasks, colStatus) {
+            el.innerHTML = '';
+            if (tasks.length === 0) {
+                el.innerHTML = '<div class="text-muted text-sm text-center py-6 border-2 border-dashed border-[#2e2e3a] rounded-lg">Drop tasks here or click + to add</div>';
+                return;
+            }
+
+            tasks.forEach(task => {
+                const badgeColor = {
+                    'low': 'bg-slate-700 text-slate-300',
+                    'medium': 'bg-amber-900 text-amber-300',
+                    'high': 'bg-orange-900 text-orange-300',
+                    'critical': 'bg-red-900 text-red-300'
+                }[task.priority] || 'bg-slate-700 text-slate-300';
+
+                const tagsHtml = (task.tags || []).map(tag => `<span class="tag-pill px-2 py-0.5 rounded-full text-xs">${tag.trim()}</span>`).join('');
+
+                const div = document.createElement('div');
+                div.className = 'task-card bg-[#1c1c24] rounded-lg border border-[#2e2e3a] p-3 mb-2 hover:border-violet-500 transition-colors cursor-pointer';
+                div.draggable = true;
+                div.ondragstart = (e) => e.dataTransfer.setData('text/plain', task.id);
+
+                div.innerHTML = \`
+                    <div class="flex justify-between items-start mb-2">
+                        <h4 class="font-semibold text-gray-200 text-sm break-words">\${escapeHTML(task.title)}</h4>
+                    </div>
+                    \${task.description ? \`<p class="text-xs text-muted mb-3 line-clamp-2 overflow-hidden text-ellipsis">\${escapeHTML(task.description)}</p>\` : ''}
+                    <div class="flex flex-wrap gap-2 mb-3 items-center">
+                        <span class="px-2 py-0.5 rounded text-xs font-medium \${badgeColor}">\${task.priority}</span>
+                        \${task.aiScore > 0 ? \`<span class="px-2 py-0.5 rounded text-xs font-medium bg-violet-900 text-violet-300">AI \${task.aiScore}</span>\` : ''}
+                        \${tagsHtml}
+                    </div>
+                    <div class="flex justify-between items-center pt-2 border-t border-[#2e2e3a] gap-1">
+                        <button onclick="moveTask('\${task.id}', '\${getPrevStatus(task.status)}')" class="hover-btn text-xs text-muted hover:text-white px-2 py-1 bg-[#2e2e3a] rounded \${task.status === 'todo' ? 'invisible' : ''}">← Move</button>
+                        <button onclick="deleteTask('\${task.id}')" class="hover-btn text-xs text-red-400 hover:text-red-300 px-2 py-1 bg-[#2e2e3a] rounded">🗑 Delete</button>
+                        <button onclick="moveTask('\${task.id}', '\${getNextStatus(task.status)}')" class="hover-btn text-xs text-muted hover:text-white px-2 py-1 bg-[#2e2e3a] rounded \${task.status === 'done' ? 'invisible' : ''}">Move →</button>
+                    </div>
+                \`;
+                el.appendChild(div);
+            });
+        }
+
+        // Stats updates
+        function updateStats(tasks) {
+            const inProgress = tasks.filter(t => t.status === 'in-progress').length;
+            const done = tasks.filter(t => t.status === 'done').length;
+            const scoredTasks = tasks.filter(t => t.aiScore > 0);
+            
+            let avgScore = '—';
+            if (scoredTasks.length > 0) {
+                const totalScore = scoredTasks.reduce((sum, t) => sum + (t.aiScore || 0), 0);
+                avgScore = Math.round(totalScore / scoredTasks.length);
+            }
+
+            DOM.statTotal.textContent = tasks.length;
+            DOM.statInProgress.textContent = inProgress;
+            DOM.statDone.textContent = done;
+            DOM.statAI.textContent = avgScore;
+        }
+
+        // Helpers
+        function escapeHTML(str) {
+            if (!str) return '';
+            return str.replace(/[&<>'"]/g, tag => ({
+                '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
+            }[tag]));
+        }
+
+        function getNextStatus(s) { return s === 'todo' ? 'in-progress' : (s === 'in-progress' ? 'done' : 'done'); }
+        function getPrevStatus(s) { return s === 'done' ? 'in-progress' : (s === 'in-progress' ? 'todo' : 'todo'); }
+
+        window.moveTask = (id, newStatus) => {
+            TaskManager.move(id, newStatus);
+            renderBoard();
+        };
+
+        window.deleteTask = (id) => {
+            TaskManager.delete(id);
+            renderBoard();
+        };
+
+        // Drag and Drop
+        window.allowDrop = (e) => { e.preventDefault(); };
+        window.dragEnter = (e) => { e.currentTarget.classList.add('drag-over'); };
+        window.dragLeave = (e) => { e.currentTarget.classList.remove('drag-over'); };
+        window.handleDrop = (e, status) => {
+            e.preventDefault();
+            e.currentTarget.classList.remove('drag-over');
+            const id = e.dataTransfer.getData('text/plain');
+            if (id) {
+                TaskManager.move(id, status);
+                renderBoard();
+            }
+        };
+
+        // Add Task Modal
+        DOM.btnAdd.onclick = () => {
+            DOM.inputTitle.value = '';
+            DOM.inputDesc.value = '';
+            DOM.inputTags.value = '';
+            DOM.inputPriority.value = 'medium';
+            DOM.aiResult.classList.add('hidden');
+            currentAiScore = 0;
+            checkApiKeyBtn();
+            DOM.modalAdd.classList.remove('hidden');
+            DOM.inputTitle.focus();
+        };
+
+        DOM.btnCancelTask.onclick = () => DOM.modalAdd.classList.add('hidden');
+
+        DOM.btnSaveTask.onclick = () => {
+            const title = DOM.inputTitle.value.trim();
+            if (!title) return alert('Title is required');
+            
+            const tagsRaw = DOM.inputTags.value.split(',').map(t => t.trim()).filter(t => t);
+            
+            TaskManager.add({
+                title,
+                description: DOM.inputDesc.value.trim(),
+                tags: tagsRaw,
+                priority: DOM.inputPriority.value,
+                status: 'todo',
+                aiScore: currentAiScore
+            });
+            
+            DOM.modalAdd.classList.add('hidden');
+            renderBoard();
+        };
+
+        function checkApiKeyBtn() {
+            const key = localStorage.getItem('groq_api_key');
+            if (!key) {
+                DOM.btnScoreAI.classList.add('opacity-50', 'cursor-not-allowed');
+                DOM.btnScoreAI.title = 'Add API key in settings';
+            } else {
+                DOM.btnScoreAI.classList.remove('opacity-50', 'cursor-not-allowed');
+                DOM.btnScoreAI.title = '';
+            }
+        }
+
+        DOM.btnScoreAI.onclick = async () => {
+            const title = DOM.inputTitle.value.trim();
+            if (!title) return alert('Please enter a title first');
+            
+            DOM.btnScoreAI.innerHTML = '<span class="animate-pulse">Scoring...</span>';
+            DOM.btnScoreAI.disabled = true;
+
+            const res = await scoreWithAI(title, DOM.inputDesc.value.trim());
+            
+            DOM.btnScoreAI.innerHTML = '<span>Score with AI ✨</span>';
+            DOM.btnScoreAI.disabled = false;
+
+            if (res) {
+                DOM.inputPriority.value = res.priority;
+                currentAiScore = res.score;
+                DOM.aiResult.innerHTML = \`<span class="text-violet-400 font-medium">AI Score: \${res.score}</span><br>\${escapeHTML(res.reason)}\`;
+                DOM.aiResult.classList.remove('hidden');
+            }
+        };
+
+        // Settings Modal
+        DOM.btnSettings.onclick = () => {
+            DOM.inputKey.value = localStorage.getItem('groq_api_key') || '';
+            updateSettingsStatus();
+            DOM.modalSettings.classList.remove('hidden');
+        };
+        DOM.btnCloseSettings.onclick = () => DOM.modalSettings.classList.add('hidden');
+
+        DOM.btnSaveKey.onclick = () => {
+            const val = DOM.inputKey.value.trim();
+            if (val) {
+                localStorage.setItem('groq_api_key', val);
+                updateSettingsStatus();
+            }
+        };
+        DOM.btnClearKey.onclick = () => {
+            localStorage.removeItem('groq_api_key');
+            DOM.inputKey.value = '';
+            updateSettingsStatus();
+        };
+
+        function updateSettingsStatus() {
+            if (localStorage.getItem('groq_api_key')) {
+                DOM.keyStatus.textContent = 'Key saved ✓';
+                DOM.keyStatus.className = 'text-sm font-medium text-center py-2 rounded bg-emerald-900 text-emerald-300 mt-4';
+            } else {
+                DOM.keyStatus.textContent = 'No key set';
+                DOM.keyStatus.className = 'text-sm font-medium text-center py-2 rounded bg-red-900 text-red-300 mt-4';
+            }
+        }
+
+        // Ask AI Panel
+        DOM.btnCloseAI.onclick = () => DOM.aiPanel.classList.remove('open');
+        DOM.btnAskAI.onclick = async () => {
+            const key = localStorage.getItem('groq_api_key');
+            if (!key) {
+                return alert('Add your free Groq API key in Settings (get one free at console.groq.com)');
+            }
+
+            const tasks = TaskManager.getAll().map(t => ({
+                title: t.title,
+                status: t.status,
+                priority: t.priority
+            }));
+
+            DOM.aiPanel.classList.add('open');
+            DOM.aiResults.innerHTML = '';
+            DOM.aiLoading.classList.remove('hidden');
+
+            try {
+                const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer \${key}`
+                    },
+                    body: JSON.stringify({
+                        model: 'llama-3.1-8b-instant',
+                        max_tokens: 200,
+                        messages: [
+                            {
+                                role: 'system',
+                                content: 'You are a productivity coach. Respond with exactly 3 bullet points, each under 15 words, starting with an action verb. Plain text, no markdown.'
+                            },
+                            {
+                                role: 'user',
+                                content: \`My tasks: \${JSON.stringify(tasks)}. What should I focus on today?\`
+                            }
+                        ]
+                    })
+                });
+                const data = await res.json();
+                const text = data.choices[0].message.content.trim();
+                
+                const bullets = text.split('\\n').filter(l => l.trim());
+                
+                DOM.aiLoading.classList.add('hidden');
+                DOM.aiResults.innerHTML = bullets.map(b => {
+                    const clean = escapeHTML(b.replace(/^[•\\-\\*]\\s*/, '').trim());
+                    return \`<div class="bg-[#2e2e3a] p-3 rounded border-l-4 border-violet-500 text-sm">\${clean}</div>\`;
+                }).join('');
+
+            } catch (e) {
+                console.error(e);
+                DOM.aiLoading.classList.add('hidden');
+                DOM.aiResults.innerHTML = '<div class="text-red-400 p-3">Failed to load focus recommendations.</div>';
+            }
+        };
+
+        // Init
+        renderBoard();
+    </script>
+</body>
+</html>

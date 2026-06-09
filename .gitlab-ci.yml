@@ -1,0 +1,13 @@
+pages:
+  stage: deploy
+  before_script:
+    - mkdir -p public
+    - cp index.html public/index.html
+    - cp -r speckit public/ 2>/dev/null || true
+  script:
+    - echo "FlowDesk deployed"
+  artifacts:
+    paths:
+      - public
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main"
