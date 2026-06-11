@@ -1,1 +1,14 @@
-{"name": "flowdesk", "version": "1.0.0", "description": "FlowDesk MVP - AI Kanban Board. A lightweight task manager powered by Groq Llama 3.1", "scripts": {"test": "jest --coverage --fail-under=100", "lint": "eslint . && biome lint . && oxlint", "format": "prettier --write .", "typecheck": "tsc --noEmit", "audit": "npm audit", "knip": "knip", "prepare": "husky install"}}
+{
+    "name":  "flowdesk",
+    "version":  "1.0.3",
+    "description":  "FlowDesk MVP - AI Kanban Board. A lightweight task manager powered by Groq Llama 3.1",
+    "scripts":  {
+                    "test":  "jest --coverage --fail-under=100",
+                    "lint":  "eslint . \u0026\u0026 biome lint . \u0026\u0026 oxlint",
+                    "format":  "prettier --write .",
+                    "typecheck":  "tsc --noEmit",
+                    "audit":  "npm audit",
+                    "knip":  "knip",
+                    "prepare":  "husky install"
+                }
+}

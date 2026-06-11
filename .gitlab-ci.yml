@@ -1,4 +1,5 @@
 stages:
+  - release
   - lint
   - format
   - type_check
@@ -62,3 +63,9 @@ pages:
       - public
   rules:
     - if: $CI_COMMIT_BRANCH == "main"
+
+release:
+  stage: release
+  script: echo "Release job"
+  rules:
+    - if: $CI_COMMIT_TAG
