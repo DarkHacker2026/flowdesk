@@ -1,6 +1,6 @@
 {
     "name":  "flowdesk",
-    "version":  "1.0.3",
+    "version":  "1.0.4",
     "description":  "FlowDesk MVP - AI Kanban Board. A lightweight task manager powered by Groq Llama 3.1",
     "scripts":  {
                     "test":  "jest --coverage --fail-under=100",
