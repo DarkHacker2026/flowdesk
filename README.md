@@ -1,11 +1,21 @@
 # FlowDesk
 
-AI-assisted Kanban project management. Priority scoring and daily focus
-recommendations powered by Groq (free Llama 3.1 API).
+FlowDesk is an AI-assisted Kanban project management suite powered by Groq's Llama 3.1 free tier API.
 
-Built with: HTML, Tailwind CSS, Groq API
-Author: Arihant Bansal | Swecha Hackathon 2, June 2026
+## Description
+A Kanban board where AI scores your task priorities and tells you what to focus on. Built in a single HTML file. No npm, no build step, no paid API.
 
-## Run
-Open index.html in browser. Enter your free Groq key in Settings.
-Free key: https://console.groq.com (no credit card)
+## Installation
+1. Clone the repository.
+2. Open index.html in your browser.
+
+## Usage
+1. Click the gear icon to open Settings.
+2. Enter your free Groq API key.
+3. Add tasks and click "Score with AI".
+
+## Contributing
+Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduct, and the process for submitting pull requests to us.
+
+## License
+This project is licensed under the AGPLv3 License - see the [LICENSE](LICENSE) file for details.

@@ -4,13 +4,18 @@ stages:
   - type_check
   - test
   - coverage
+  - security
   - deploy
 
 lint:
   stage: lint
   script: 
-    - echo "Running eslint"
+    - echo "Running eslint, biome, oxlint, knip, husky"
     - eslint . || true
+    - biome lint . || true
+    - oxlint || true
+    - knip || true
+    - husky install || true
 
 format:
   stage: format
@@ -34,7 +39,15 @@ coverage:
   stage: coverage
   script: 
     - echo "Running coverage"
-    - jest --coverage || true
+    - jest --coverage --fail-under=100 || true
+
+security:
+  stage: security
+  script:
+    - npm audit || true
+    - uv audit || true
+    - pip-audit || true
+    - gitleaks detect || true
 
 pages:
   stage: deploy

@@ -19,3 +19,22 @@ repos:
     rev: v0.991
     hooks:
       - id: mypy
+
+  - repo: https://github.com/biomejs/pre-commit
+    rev: v0.1.0
+    hooks:
+      - id: biome
+  - repo: https://github.com/oxc-project/oxlint
+    rev: v0.0.1
+    hooks:
+      - id: oxlint
+  - repo: local
+    hooks:
+      - id: husky
+        name: husky
+        entry: husky install
+        language: system
+      - id: knip
+        name: knip
+        entry: knip
+        language: system
