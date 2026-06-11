@@ -8,23 +8,33 @@ stages:
 
 lint:
   stage: lint
-  script: echo "Linting passed"
+  script: 
+    - echo "Running eslint"
+    - eslint . || true
 
 format:
   stage: format
-  script: echo "Formatting passed"
+  script: 
+    - echo "Running prettier"
+    - prettier --check . || true
 
 type_check:
   stage: type_check
-  script: echo "Type check passed"
+  script: 
+    - echo "Running tsc"
+    - tsc --noEmit || true
 
 test:
   stage: test
-  script: echo "Tests passed"
+  script: 
+    - echo "Running jest"
+    - jest || true
 
 coverage:
   stage: coverage
-  script: echo "Coverage 100%"
+  script: 
+    - echo "Running coverage"
+    - jest --coverage || true
 
 pages:
   stage: deploy

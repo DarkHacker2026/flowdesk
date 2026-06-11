@@ -1,0 +1,1 @@
+{"name": "flowdesk", "version": "1.0.0", "description": "FlowDesk MVP - AI Kanban", "scripts": {"test": "jest", "lint": "eslint .", "format": "prettier --write .", "typecheck": "tsc --noEmit", "audit": "npm audit"}}
