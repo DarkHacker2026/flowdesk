@@ -213,9 +213,9 @@
 
     <!-- Hero -->
     <header class="py-24 px-6 text-center z-10 flex flex-col items-center">
-        <div class="section-label mb-4 text-violet-400">Project Intelligence</div>
-        <h1 class="text-5xl md:text-7xl font-bold mb-6 text-iridescent tracking-tight max-w-4xl mx-auto leading-tight">Prioritize at the speed of thought.</h1>
-        <p class="text-lg md:text-xl text-[#94a3b8] max-w-2xl mx-auto mb-10">FlowDesk uses local AI to intelligently score and organize your tasks, so you can stop planning and start shipping.</p>
+        <div class="section-label mb-4 text-violet-400" data-i18n="proj-intel">Project Intelligence</div>
+        <h1 class="text-5xl md:text-7xl font-bold mb-6 text-iridescent tracking-tight max-w-4xl mx-auto leading-tight" data-i18n="hero-title">Prioritize at the speed of thought.</h1>
+        <p class="text-lg md:text-xl text-[#94a3b8] max-w-2xl mx-auto mb-10" data-i18n="hero-desc">FlowDesk uses local AI to intelligently score and organize your tasks, so you can stop planning and start shipping.</p>
         
         <div class="glass-panel inline-flex gap-4 text-sm flex-wrap justify-center p-2 rounded-2xl shadow-2xl">
             <div class="px-4 py-1.5 rounded-full"><span data-i18n="total-tasks" class="text-muted">Total:</span> <span id="stat-total" class="font-bold text-white">0</span></div>
@@ -266,8 +266,8 @@
     <!-- Wall of Love (Reviews) -->
     <section class="z-10 w-full mb-32" id="wall-of-love">
         <div class="text-center mb-8">
-            <div class="section-label mb-2 text-fuchsia-400">Wall of Love</div>
-            <h2 class="text-3xl font-bold text-[#f1f5f9]">Loved by builders everywhere.</h2>
+            <div class="section-label mb-2 text-fuchsia-400" data-i18n="wall-of-love-sub">Wall of Love</div>
+            <h2 class="text-3xl font-bold text-[#f1f5f9]" data-i18n="wall-of-love-title">Loved by builders everywhere.</h2>
         </div>
         <div class="marquee-wrapper">
             <div class="marquee left" id="marquee-1"></div>
@@ -280,29 +280,29 @@
     <!-- Add Task Modal -->
     <div id="modal-add-task" class="fixed inset-0 modal-overlay hidden z-50 flex items-center justify-center p-4">
         <div class="card-bg rounded-xl p-6 w-full max-w-md border shadow-2xl relative">
-            <h3 class="text-xl font-bold mb-4">Add Task</h3>
+            <h3 class="text-xl font-bold mb-4" data-i18n="add-task-title">Add Task</h3>
             
             <div class="space-y-4">
                 <div>
-                    <label class="block text-sm font-medium mb-1">Title *</label>
+                    <label class="block text-sm font-medium mb-1" data-i18n="task-title-label">Title *</label>
                     <input type="text" id="task-title" class="w-full bg-[#0f0f11] border border-[#2e2e3a] rounded p-2 text-white focus:focus-ring" placeholder="E.g., Fix login bug">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium mb-1">Description</label>
+                    <label class="block text-sm font-medium mb-1" data-i18n="task-desc-label">Description</label>
                     <textarea id="task-desc" class="w-full bg-[#0f0f11] border border-[#2e2e3a] rounded p-2 text-white focus:focus-ring min-h-[80px]"></textarea>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium mb-1">Tags</label>
+                    <label class="block text-sm font-medium mb-1" data-i18n="task-tags-label">Tags</label>
                     <input type="text" id="task-tags" class="w-full bg-[#0f0f11] border border-[#2e2e3a] rounded p-2 text-white focus:focus-ring" placeholder="bug, frontend, urgent">
                 </div>
                 <div class="flex gap-4">
                     <div class="flex-1">
-                        <label class="block text-sm font-medium mb-1">Priority</label>
+                        <label class="block text-sm font-medium mb-1" data-i18n="task-priority-label">Priority</label>
                         <select id="task-priority" class="w-full bg-[#0f0f11] border border-[#2e2e3a] rounded p-2 text-white focus:focus-ring appearance-none">
-                            <option value="low">Low</option>
-                            <option value="medium" selected>Medium</option>
-                            <option value="high">High</option>
-                            <option value="critical">Critical</option>
+                            <option value="low" data-i18n="priority-low">Low</option>
+                            <option value="medium" selected data-i18n="priority-med">Medium</option>
+                            <option value="high" data-i18n="priority-high">High</option>
+                            <option value="critical" data-i18n="priority-crit">Critical</option>
                         </select>
                     </div>
                 </div>
@@ -318,8 +318,8 @@
             </div>
 
             <div class="flex justify-end gap-3 mt-6 pt-4 border-t border-[#2e2e3a]">
-                <button type="button" id="btn-cancel-task" class="px-4 py-2 text-gray-400 hover:text-white transition-colors">Cancel</button>
-                <button type="button" id="btn-save-task" class="hover-btn px-4 py-2 bg-violet-600 hover:bg-violet-700 text-white rounded font-medium">Add Task</button>
+                <button type="button" id="btn-cancel-task" class="px-4 py-2 text-gray-400 hover:text-white transition-colors" data-i18n="btn-cancel">Cancel</button>
+                <button type="button" id="btn-save-task" class="hover-btn px-4 py-2 bg-violet-600 hover:bg-violet-700 text-white rounded font-medium" data-i18n="btn-add-task">Add Task</button>
             </div>
         </div>
     </div>
@@ -327,35 +327,35 @@
     <!-- Settings Modal -->
     <div id="modal-settings" class="fixed inset-0 modal-overlay hidden z-50 flex items-center justify-center p-4">
         <div class="card-bg rounded-xl p-6 w-full max-w-md border shadow-2xl relative max-h-[90vh] overflow-y-auto">
-            <h3 class="text-xl font-bold mb-4">Settings</h3>
+            <h3 class="text-xl font-bold mb-4" data-i18n="settings-title">Settings</h3>
             
             <div class="space-y-4">
                 <div>
-                    <label class="block text-sm font-medium mb-1">AI Provider</label>
+                    <label class="block text-sm font-medium mb-1" data-i18n="ai-provider">AI Provider</label>
                     <select id="provider-select" class="w-full bg-[#0f0f11] border border-[#2e2e3a] rounded p-2 text-white focus:focus-ring appearance-none">
-                        <option value="groq">Groq Cloud (Fast, Free)</option>
-                        <option value="ollama">Ollama (Local Hardware)</option>
+                        <option value="groq" data-i18n="provider-groq">Groq Cloud (Fast, Free)</option>
+                        <option value="ollama" data-i18n="provider-ollama">Ollama (Local Hardware)</option>
                     </select>
                 </div>
 
                 <div id="settings-groq">
-                    <label class="block text-sm font-medium mb-1">Groq API Key</label>
+                    <label class="block text-sm font-medium mb-1" data-i18n="groq-key">Groq API Key</label>
                     <input type="password" id="groq-key" class="w-full bg-[#0f0f11] border border-[#2e2e3a] rounded p-2 text-white focus:focus-ring" placeholder="gsk_xxxxx">
-                    <p class="text-xs text-muted mt-1">Free key at <a href="https://console.groq.com" target="_blank" class="text-violet-400 hover:underline">console.groq.com</a></p>
+                    <p class="text-xs text-muted mt-1"><span data-i18n="groq-hint">Free key at</span> <a href="https://console.groq.com" target="_blank" class="text-violet-400 hover:underline">console.groq.com</a></p>
                 </div>
 
                 <div id="settings-ollama" class="hidden">
-                    <label class="block text-sm font-medium mb-1">Ollama URL</label>
+                    <label class="block text-sm font-medium mb-1" data-i18n="ollama-url">Ollama URL</label>
                     <input type="text" id="ollama-url" class="w-full bg-[#0f0f11] border border-[#2e2e3a] rounded p-2 text-white focus:focus-ring mb-3" placeholder="http://localhost:11434">
                     
-                    <label class="block text-sm font-medium mb-1">Ollama Model</label>
+                    <label class="block text-sm font-medium mb-1" data-i18n="ollama-model">Ollama Model</label>
                     <input type="text" id="ollama-model" class="w-full bg-[#0f0f11] border border-[#2e2e3a] rounded p-2 text-white focus:focus-ring" placeholder="llama3.1">
-                    <p class="text-xs text-muted mt-1">Ensure model is pulled (`ollama run llama3.1`) and Ollama has CORS enabled (`OLLAMA_ORIGINS="*"`).</p>
+                    <p class="text-xs text-muted mt-1" data-i18n="ollama-hint">Ensure model is pulled (`ollama run llama3.1`) and Ollama has CORS enabled (`OLLAMA_ORIGINS="*"`).</p>
                 </div>
                 
                 <div class="flex gap-3 mt-4">
-                    <button type="button" id="btn-save-settings" class="hover-btn flex-1 py-2 bg-violet-600 hover:bg-violet-700 text-white rounded font-medium">Save Settings</button>
-                    <button type="button" id="btn-clear-settings" class="hover-btn flex-1 py-2 bg-[#2e2e3a] hover:bg-[#3f3f4e] text-white rounded font-medium">Clear All</button>
+                    <button type="button" id="btn-save-settings" class="hover-btn flex-1 py-2 bg-violet-600 hover:bg-violet-700 text-white rounded font-medium" data-i18n="btn-save">Save Settings</button>
+                    <button type="button" id="btn-clear-settings" class="hover-btn flex-1 py-2 bg-[#2e2e3a] hover:bg-[#3f3f4e] text-white rounded font-medium" data-i18n="btn-clear">Clear All</button>
                 </div>
 
                 <div id="key-status" class="text-sm font-medium text-center py-2 rounded hidden">
@@ -372,17 +372,17 @@
     <!-- AI Focus Panel -->
     <div id="ai-panel" class="fixed top-0 right-0 h-full w-[300px] bg-[#1c1c24] border-l border-[#2e2e3a] shadow-2xl slide-panel z-50 flex flex-col">
         <div class="p-4 border-b border-[#2e2e3a] flex justify-between items-center bg-[#0f0f11]">
-            <h3 class="font-bold text-violet-400 flex items-center gap-2">✨ AI Focus</h3>
+            <h3 class="font-bold text-violet-400 flex items-center gap-2" data-i18n="ai-focus-title">✨ AI Focus</h3>
             <button id="btn-close-ai" class="text-gray-400 hover:text-white">✕</button>
         </div>
         <div class="p-4 flex-1 overflow-y-auto" id="ai-panel-content">
             <!-- Content -->
             <div id="ai-loading" class="hidden flex flex-col items-center justify-center py-10 text-muted">
                 <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-violet-600 mb-4"></div>
-                <p>Analyzing tasks...</p>
+                <p data-i18n="ai-loading">Analyzing tasks...</p>
             </div>
             <div id="ai-results" class="space-y-3">
-                <p class="text-muted text-sm text-center py-10">Click 'Ask AI' to get prioritized focus areas.</p>
+                <p class="text-muted text-sm text-center py-10" data-i18n='ai-empty'>Click 'Ask AI' to get prioritized focus areas.</p>
             </div>
         </div>
     </div>
@@ -399,7 +399,41 @@
                 "todo": "To Do",
                 "in-progress": "In Progress",
                 "done": "Done",
-                "drop-tasks": "Drop tasks here or click + to add"
+                "drop-tasks": "Drop tasks here or click + to add",
+                "proj-intel": "Project Intelligence",
+                "hero-title": "Prioritize at the speed of thought.",
+                "hero-desc": "FlowDesk uses local AI to intelligently score and organize your tasks, so you can stop planning and start shipping.",
+                "wall-of-love-sub": "Wall of Love",
+                "wall-of-love-title": "Loved by builders everywhere.",
+                "add-task-title": "Add Task",
+                "task-title-label": "Title *",
+                "task-desc-label": "Description",
+                "task-tags-label": "Tags",
+                "task-priority-label": "Priority",
+                "priority-low": "Low",
+                "priority-med": "Medium",
+                "priority-high": "High",
+                "priority-crit": "Critical",
+                "score-ai": "Score with AI ✨",
+                "btn-cancel": "Cancel",
+                "btn-add-task": "Add Task",
+                "settings-title": "Settings",
+                "ai-provider": "AI Provider",
+                "provider-groq": "Groq Cloud (Fast, Free)",
+                "provider-ollama": "Ollama (Local Hardware)",
+                "groq-key": "Groq API Key",
+                "groq-hint": "Free key at",
+                "ollama-url": "Ollama URL",
+                "ollama-model": "Ollama Model",
+                "ollama-hint": "Ensure model is pulled (`ollama run llama3.1`) and Ollama has CORS enabled (`OLLAMA_ORIGINS=\"*\"`).",
+                "btn-save": "Save Settings",
+                "btn-clear": "Clear All",
+                "ai-focus-title": "✨ AI Focus",
+                "ai-loading": "Analyzing tasks...",
+                "ai-empty": "Click 'Ask AI' to get prioritized focus areas.",
+                "move-left": "← Move",
+                "delete": "🗑 Delete",
+                "move-right": "Move →"
             },
             hi: {
                 "ask-ai": "AI से पूछें ✨",
@@ -410,7 +444,41 @@
                 "todo": "करने के लिए",
                 "in-progress": "प्रगति पर",
                 "done": "हो गया",
-                "drop-tasks": "कार्य यहां छोड़ें या जोड़ने के लिए + पर क्लिक करें"
+                "drop-tasks": "कार्य यहां छोड़ें या जोड़ने के लिए + पर क्लिक करें",
+                "proj-intel": "परियोजना बुद्धिमत्ता",
+                "hero-title": "विचार की गति से प्राथमिकता दें।",
+                "hero-desc": "FlowDesk आपके कार्यों को समझदारी से स्कोर करने और व्यवस्थित करने के लिए स्थानीय AI का उपयोग करता है।",
+                "wall-of-love-sub": "प्यार की दीवार",
+                "wall-of-love-title": "हर जगह निर्माताओं द्वारा पसंद किया गया।",
+                "add-task-title": "कार्य जोड़ें",
+                "task-title-label": "शीर्षक *",
+                "task-desc-label": "विवरण",
+                "task-tags-label": "टैग",
+                "task-priority-label": "प्राथमिकता",
+                "priority-low": "कम",
+                "priority-med": "मध्यम",
+                "priority-high": "उच्च",
+                "priority-crit": "महत्वपूर्ण",
+                "score-ai": "AI के साथ स्कोर करें ✨",
+                "btn-cancel": "रद्द करें",
+                "btn-add-task": "कार्य जोड़ें",
+                "settings-title": "सेटिंग्स",
+                "ai-provider": "AI प्रदाता",
+                "provider-groq": "ग्रोक क्लाउड (तेज़, मुफ़्त)",
+                "provider-ollama": "ओलामा (स्थानीय हार्डवेयर)",
+                "groq-key": "Groq API कुंजी",
+                "groq-hint": "मुफ़्त कुंजी यहाँ",
+                "ollama-url": "Ollama URL",
+                "ollama-model": "Ollama मॉडल",
+                "ollama-hint": "सुनिश्चित करें कि मॉडल खींचा गया है (`ollama run llama3.1`) और Ollama में CORS सक्षम है (`OLLAMA_ORIGINS=\"*\"`)।",
+                "btn-save": "सेटिंग्स सहेजें",
+                "btn-clear": "सभी साफ़ करें",
+                "ai-focus-title": "✨ AI फ़ोकस",
+                "ai-loading": "कार्यों का विश्लेषण कर रहा है...",
+                "ai-empty": "प्राथमिकता वाले फ़ोकस क्षेत्र प्राप्त करने के लिए 'AI से पूछें' पर क्लिक करें।",
+                "move-left": "← ले जाएँ",
+                "delete": "🗑 हटाएं",
+                "move-right": "ले जाएँ →"
             },
             te: {
                 "ask-ai": "AI ని అడగండి ✨",
@@ -421,10 +489,43 @@
                 "todo": "చేయవలసినవి",
                 "in-progress": "పురోగతిలో ఉంది",
                 "done": "పూర్తయింది",
-                "drop-tasks": "ఇక్కడ పనులను వదలండి లేదా జోడించడానికి + క్లిక్ చేయండి"
+                "drop-tasks": "ఇక్కడ పనులను వదలండి లేదా జోడించడానికి + క్లిక్ చేయండి",
+                "proj-intel": "ప్రాజెక్ట్ ఇంటెలిజెన్స్",
+                "hero-title": "ఆలోచన వేగంతో ప్రాధాన్యత ఇవ్వండి.",
+                "hero-desc": "FlowDesk మీ పనులను తెలివిగా స్కోర్ చేయడానికి మరియు నిర్వహించడానికి స్థానిక AIని ఉపయోగిస్తుంది.",
+                "wall-of-love-sub": "ప్రేమ గోడ",
+                "wall-of-love-title": "అన్ని చోట్లా బిల్డర్లచే ఇష్టపడబడింది.",
+                "add-task-title": "పనిని జోడించండి",
+                "task-title-label": "శీర్షిక *",
+                "task-desc-label": "వివరణ",
+                "task-tags-label": "ట్యాగ్‌లు",
+                "task-priority-label": "ప్రాధాన్యత",
+                "priority-low": "తక్కువ",
+                "priority-med": "మధ్యస్థం",
+                "priority-high": "ఎక్కువ",
+                "priority-crit": "క్లిష్టమైన",
+                "score-ai": "AI తో స్కోర్ చేయండి ✨",
+                "btn-cancel": "రద్దు చేయండి",
+                "btn-add-task": "పనిని జోడించండి",
+                "settings-title": "అమరికలు",
+                "ai-provider": "AI ప్రొవైడర్",
+                "provider-groq": "Groq క్లౌడ్ (వేగవంతమైన, ఉచితం)",
+                "provider-ollama": "Ollama (స్థానిక హార్డ్‌వేర్)",
+                "groq-key": "Groq API కీ",
+                "groq-hint": "ఉచిత కీ",
+                "ollama-url": "Ollama URL",
+                "ollama-model": "Ollama మోడల్",
+                "ollama-hint": "మోడల్ లాగబడిందని నిర్ధారించుకోండి (`ollama run llama3.1`) మరియు Ollama లో CORS ప్రారంభించబడిందని నిర్ధారించుకోండి (`OLLAMA_ORIGINS=\"*\"`).",
+                "btn-save": "అమరికలను సేవ్ చేయండి",
+                "btn-clear": "అన్నింటినీ క్లియర్ చేయండి",
+                "ai-focus-title": "✨ AI ఫోకస్",
+                "ai-loading": "పనులను విశ్లేషిస్తోంది...",
+                "ai-empty": "ప్రాధాన్యతా ఫోకస్ ప్రాంతాలను పొందడానికి 'AIని అడగండి' క్లిక్ చేయండి.",
+                "move-left": "← తరలించండి",
+                "delete": "🗑 తొలగించండి",
+                "move-right": "తరలించండి →"
             }
         };
-
         let currentLang = 'en';
 
         function setLanguage(lang) {
@@ -649,9 +750,9 @@
                         ${tagsHtml}
                     </div>
                     <div class="flex justify-between items-center pt-3 mt-2 border-t border-white/5 gap-1">
-                        <button onclick="moveTask('${task.id}', '${getPrevStatus(task.status)}')" class="hover-btn text-xs text-muted hover:text-white px-2 py-1 bg-white/5 rounded ${task.status === 'todo' ? 'invisible' : ''}">← Move</button>
-                        <button onclick="deleteTask('${task.id}')" class="hover-btn text-xs text-red-400 hover:text-red-300 px-2 py-1 bg-white/5 rounded">🗑 Delete</button>
-                        <button onclick="moveTask('${task.id}', '${getNextStatus(task.status)}')" class="hover-btn text-xs text-muted hover:text-white px-2 py-1 bg-white/5 rounded ${task.status === 'done' ? 'invisible' : ''}">Move →</button>
+                        <button onclick="moveTask('${task.id}', '${getPrevStatus(task.status)}')" class="hover-btn text-xs text-muted hover:text-white px-2 py-1 bg-white/5 rounded ${task.status === 'todo' ? 'invisible' : ''}" data-i18n="move-left">← Move</button>
+                        <button onclick="deleteTask('${task.id}')" class="hover-btn text-xs text-red-400 hover:text-red-300 px-2 py-1 bg-white/5 rounded" data-i18n="delete">🗑 Delete</button>
+                        <button onclick="moveTask('${task.id}', '${getNextStatus(task.status)}')" class="hover-btn text-xs text-muted hover:text-white px-2 py-1 bg-white/5 rounded ${task.status === 'done' ? 'invisible' : ''}" data-i18n="move-right">Move →</button>
                     </div>
                 `;
                 el.appendChild(div);
