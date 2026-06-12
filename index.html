@@ -157,22 +157,39 @@
 
     <!-- Settings Modal -->
     <div id="modal-settings" class="fixed inset-0 modal-overlay hidden z-50 flex items-center justify-center p-4">
-        <div class="card-bg rounded-xl p-6 w-full max-w-md border shadow-2xl relative">
+        <div class="card-bg rounded-xl p-6 w-full max-w-md border shadow-2xl relative max-h-[90vh] overflow-y-auto">
             <h3 class="text-xl font-bold mb-4">Settings</h3>
             
             <div class="space-y-4">
                 <div>
-                    <label class="block text-sm font-medium mb-1">Groq API Key</label>
-                    <input type="password" id="groq-key" class="w-full bg-[#0f0f11] border border-[#2e2e3a] rounded p-2 text-white focus:focus-ring" placeholder="gsk_xxxxx">
-                    <p class="text-xs text-muted mt-1">Free key at <a href="https://console.groq.com" target="_blank" class="text-violet-400 hover:underline">console.groq.com</a> — no credit card needed</p>
-                </div>
-                
-                <div class="flex gap-3">
-                    <button type="button" id="btn-save-key" class="hover-btn flex-1 py-2 bg-violet-600 hover:bg-violet-700 text-white rounded font-medium">Save Key</button>
-                    <button type="button" id="btn-clear-key" class="hover-btn flex-1 py-2 bg-[#2e2e3a] hover:bg-[#3f3f4e] text-white rounded font-medium">Clear Key</button>
+                    <label class="block text-sm font-medium mb-1">AI Provider</label>
+                    <select id="provider-select" class="w-full bg-[#0f0f11] border border-[#2e2e3a] rounded p-2 text-white focus:focus-ring appearance-none">
+                        <option value="groq">Groq Cloud (Fast, Free)</option>
+                        <option value="ollama">Ollama (Local Hardware)</option>
+                    </select>
                 </div>
 
-                <div id="key-status" class="text-sm font-medium text-center py-2 rounded">
+                <div id="settings-groq">
+                    <label class="block text-sm font-medium mb-1">Groq API Key</label>
+                    <input type="password" id="groq-key" class="w-full bg-[#0f0f11] border border-[#2e2e3a] rounded p-2 text-white focus:focus-ring" placeholder="gsk_xxxxx">
+                    <p class="text-xs text-muted mt-1">Free key at <a href="https://console.groq.com" target="_blank" class="text-violet-400 hover:underline">console.groq.com</a></p>
+                </div>
+
+                <div id="settings-ollama" class="hidden">
+                    <label class="block text-sm font-medium mb-1">Ollama URL</label>
+                    <input type="text" id="ollama-url" class="w-full bg-[#0f0f11] border border-[#2e2e3a] rounded p-2 text-white focus:focus-ring mb-3" placeholder="http://localhost:11434">
+                    
+                    <label class="block text-sm font-medium mb-1">Ollama Model</label>
+                    <input type="text" id="ollama-model" class="w-full bg-[#0f0f11] border border-[#2e2e3a] rounded p-2 text-white focus:focus-ring" placeholder="llama3.1">
+                    <p class="text-xs text-muted mt-1">Ensure model is pulled (`ollama run llama3.1`) and Ollama has CORS enabled (`OLLAMA_ORIGINS="*"`).</p>
+                </div>
+                
+                <div class="flex gap-3 mt-4">
+                    <button type="button" id="btn-save-settings" class="hover-btn flex-1 py-2 bg-violet-600 hover:bg-violet-700 text-white rounded font-medium">Save Settings</button>
+                    <button type="button" id="btn-clear-settings" class="hover-btn flex-1 py-2 bg-[#2e2e3a] hover:bg-[#3f3f4e] text-white rounded font-medium">Clear All</button>
+                </div>
+
+                <div id="key-status" class="text-sm font-medium text-center py-2 rounded hidden">
                     <!-- Status here -->
                 </div>
             </div>
@@ -295,41 +312,63 @@
             TaskManager.add({ title: 'Update landing page copy', description: 'Change H1 to be more action-oriented.', status: 'todo', priority: 'low', aiScore: 25, tags: ['marketing'] });
         }
 
-        // Groq AI Integration
-        async function scoreWithAI(title, description) {
-            const key = localStorage.getItem('groq_api_key');
-            if (!key) {
-                alert('Add your free Groq API key in Settings (get one free at console.groq.com)');
-                return null;
-            }
-            try {
-                const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${key}`
-                    },
-                    body: JSON.stringify({
-                        model: 'llama-3.1-8b-instant',
-                        max_tokens: 150,
-                        messages: [
-                            {
-                                role: 'system',
-                                content: 'You are a task prioritization assistant. Respond ONLY with raw JSON, no markdown, no explanation. Format exactly: {"priority":"low|medium|high|critical","score":0-100,"reason":"one short sentence"}'
-                            },
-                            {
-                                role: 'user',
-                                content: `Task: ${title}\nDescription: ${description || 'No description provided'}\nAssign a priority and urgency score.`
-                            }
-                        ]
-                    })
+        // Dynamic AI Fetcher
+        async function fetchAI(systemMsg, userMsg, maxTokens) {
+            const provider = localStorage.getItem('flowdesk_provider') || 'groq';
+            
+            let url, headers, body;
+            
+            if (provider === 'groq') {
+                const key = localStorage.getItem('groq_api_key');
+                if (!key) {
+                    alert('Add your free Groq API key in Settings (get one free at console.groq.com)');
+                    throw new Error('No Groq API Key');
+                }
+                url = 'https://api.groq.com/openai/v1/chat/completions';
+                headers = {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${key}`
+                };
+                body = JSON.stringify({
+                    model: 'llama-3.1-8b-instant',
+                    max_tokens: maxTokens,
+                    messages: [
+                        { role: 'system', content: systemMsg },
+                        { role: 'user', content: userMsg }
+                    ]
                 });
-                const data = await res.json();
-                const text = data.choices[0].message.content.trim();
+            } else {
+                let baseUrl = localStorage.getItem('flowdesk_ollama_url') || 'http://localhost:11434';
+                baseUrl = baseUrl.replace(/\/$/, "");
+                url = `${baseUrl}/v1/chat/completions`;
+                headers = { 'Content-Type': 'application/json' };
+                body = JSON.stringify({
+                    model: localStorage.getItem('flowdesk_ollama_model') || 'llama3.1',
+                    max_tokens: maxTokens,
+                    messages: [
+                        { role: 'system', content: systemMsg },
+                        { role: 'user', content: userMsg }
+                    ]
+                });
+            }
+
+            const res = await fetch(url, { method: 'POST', headers, body });
+            if (!res.ok) throw new Error(`API Error: ${res.status}`);
+            const data = await res.json();
+            return data.choices[0].message.content.trim();
+        }
+
+        // AI Integration
+        async function scoreWithAI(title, description) {
+            try {
+                const systemMsg = 'You are a task prioritization assistant. Respond ONLY with raw JSON, no markdown, no explanation. Format exactly: {"priority":"low|medium|high|critical","score":0-100,"reason":"one short sentence"}';
+                const userMsg = `Task: ${title}\nDescription: ${description || 'No description provided'}\nAssign a priority and urgency score.`;
+                
+                const text = await fetchAI(systemMsg, userMsg, 150);
                 const clean = text.replace(/```json|```/g, '').trim();
                 return JSON.parse(clean);
             } catch (e) {
-                console.error('Groq AI error:', e);
+                console.error('AI error:', e);
                 return { priority: 'medium', score: 50, reason: 'Could not analyze — using default' };
             }
         }
@@ -357,9 +396,14 @@
             modalSettings: document.getElementById('modal-settings'),
             btnSettings: document.getElementById('settings-btn'),
             btnCloseSettings: document.getElementById('btn-close-settings'),
+            providerSelect: document.getElementById('provider-select'),
+            settingsGroq: document.getElementById('settings-groq'),
+            settingsOllama: document.getElementById('settings-ollama'),
             inputKey: document.getElementById('groq-key'),
-            btnSaveKey: document.getElementById('btn-save-key'),
-            btnClearKey: document.getElementById('btn-clear-key'),
+            inputOllamaUrl: document.getElementById('ollama-url'),
+            inputOllamaModel: document.getElementById('ollama-model'),
+            btnSaveSettings: document.getElementById('btn-save-settings'),
+            btnClearSettings: document.getElementById('btn-clear-settings'),
             keyStatus: document.getElementById('key-status'),
 
             btnAskAI: document.getElementById('ask-ai-btn'),
@@ -533,8 +577,9 @@
         };
 
         function checkApiKeyBtn() {
+            const provider = localStorage.getItem('flowdesk_provider') || 'groq';
             const key = localStorage.getItem('groq_api_key');
-            if (!key) {
+            if (provider === 'groq' && !key) {
                 DOM.btnScoreAI.classList.add('opacity-50', 'cursor-not-allowed');
                 DOM.btnScoreAI.title = 'Add API key in settings';
             } else {
@@ -564,41 +609,66 @@
         };
 
         // Settings Modal
+        DOM.providerSelect.onchange = () => {
+            if (DOM.providerSelect.value === 'groq') {
+                DOM.settingsGroq.classList.remove('hidden');
+                DOM.settingsOllama.classList.add('hidden');
+            } else {
+                DOM.settingsGroq.classList.add('hidden');
+                DOM.settingsOllama.classList.remove('hidden');
+            }
+            checkApiKeyBtn();
+        };
+
         DOM.btnSettings.onclick = () => {
+            DOM.providerSelect.value = localStorage.getItem('flowdesk_provider') || 'groq';
             DOM.inputKey.value = localStorage.getItem('groq_api_key') || '';
-            updateSettingsStatus();
+            DOM.inputOllamaUrl.value = localStorage.getItem('flowdesk_ollama_url') || 'http://localhost:11434';
+            DOM.inputOllamaModel.value = localStorage.getItem('flowdesk_ollama_model') || 'llama3.1';
+            
+            DOM.providerSelect.onchange();
+            DOM.keyStatus.classList.add('hidden');
             DOM.modalSettings.classList.remove('hidden');
         };
         DOM.btnCloseSettings.onclick = () => DOM.modalSettings.classList.add('hidden');
 
-        DOM.btnSaveKey.onclick = () => {
-            const val = DOM.inputKey.value.trim();
-            if (val) {
-                localStorage.setItem('groq_api_key', val);
-                updateSettingsStatus();
-            }
+        DOM.btnSaveSettings.onclick = () => {
+            localStorage.setItem('flowdesk_provider', DOM.providerSelect.value);
+            localStorage.setItem('groq_api_key', DOM.inputKey.value.trim());
+            localStorage.setItem('flowdesk_ollama_url', DOM.inputOllamaUrl.value.trim() || 'http://localhost:11434');
+            localStorage.setItem('flowdesk_ollama_model', DOM.inputOllamaModel.value.trim() || 'llama3.1');
+            updateSettingsStatus('Settings saved ✓', 'emerald');
+            checkApiKeyBtn();
+            setTimeout(() => DOM.modalSettings.classList.add('hidden'), 1000);
         };
-        DOM.btnClearKey.onclick = () => {
+        
+        DOM.btnClearSettings.onclick = () => {
+            localStorage.removeItem('flowdesk_provider');
             localStorage.removeItem('groq_api_key');
+            localStorage.removeItem('flowdesk_ollama_url');
+            localStorage.removeItem('flowdesk_ollama_model');
             DOM.inputKey.value = '';
-            updateSettingsStatus();
+            DOM.inputOllamaUrl.value = 'http://localhost:11434';
+            DOM.inputOllamaModel.value = 'llama3.1';
+            updateSettingsStatus('Cleared', 'red');
+            checkApiKeyBtn();
         };
 
-        function updateSettingsStatus() {
-            if (localStorage.getItem('groq_api_key')) {
-                DOM.keyStatus.textContent = 'Key saved ✓';
-                DOM.keyStatus.className = 'text-sm font-medium text-center py-2 rounded bg-emerald-900 text-emerald-300 mt-4';
+        function updateSettingsStatus(msg = '', color = 'emerald') {
+            if (msg) {
+                DOM.keyStatus.textContent = msg;
+                DOM.keyStatus.className = `text-sm font-medium text-center py-2 rounded bg-${color}-900 text-${color}-300 mt-4`;
+                DOM.keyStatus.classList.remove('hidden');
             } else {
-                DOM.keyStatus.textContent = 'No key set';
-                DOM.keyStatus.className = 'text-sm font-medium text-center py-2 rounded bg-red-900 text-red-300 mt-4';
+                DOM.keyStatus.classList.add('hidden');
             }
         }
 
         // Ask AI Panel
         DOM.btnCloseAI.onclick = () => DOM.aiPanel.classList.remove('open');
         DOM.btnAskAI.onclick = async () => {
-            const key = localStorage.getItem('groq_api_key');
-            if (!key) {
+            const provider = localStorage.getItem('flowdesk_provider') || 'groq';
+            if (provider === 'groq' && !localStorage.getItem('groq_api_key')) {
                 return alert('Add your free Groq API key in Settings (get one free at console.groq.com)');
             }
 
@@ -613,30 +683,10 @@
             DOM.aiLoading.classList.remove('hidden');
 
             try {
-                const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${key}`
-                    },
-                    body: JSON.stringify({
-                        model: 'llama-3.1-8b-instant',
-                        max_tokens: 200,
-                        messages: [
-                            {
-                                role: 'system',
-                                content: 'You are a productivity coach. Respond with exactly 3 bullet points, each under 15 words, starting with an action verb. Plain text, no markdown.'
-                            },
-                            {
-                                role: 'user',
-                                content: `My tasks: ${JSON.stringify(tasks)}. What should I focus on today?`
-                            }
-                        ]
-                    })
-                });
-                const data = await res.json();
-                const text = data.choices[0].message.content.trim();
+                const systemMsg = 'You are a productivity coach. Respond with exactly 3 bullet points, each under 15 words, starting with an action verb. Plain text, no markdown.';
+                const userMsg = `My tasks: ${JSON.stringify(tasks)}. What should I focus on today?`;
                 
+                const text = await fetchAI(systemMsg, userMsg, 200);
                 const bullets = text.split('\n').filter(l => l.trim());
                 
                 DOM.aiLoading.classList.add('hidden');
@@ -648,7 +698,7 @@
             } catch (e) {
                 console.error(e);
                 DOM.aiLoading.classList.add('hidden');
-                DOM.aiResults.innerHTML = '<div class="text-red-400 p-3">Failed to load focus recommendations.</div>';
+                DOM.aiResults.innerHTML = '<div class="text-red-400 p-3">Failed to load focus recommendations. Check Settings / CORS.</div>';
             }
         };
 
