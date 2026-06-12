@@ -1,6 +1,8 @@
 # FlowDesk
 
-FlowDesk is an AI-assisted Kanban project management suite powered by Groq's Llama 3.1 free tier API.
+✨ **Live Demo:** [https://flowdesk-nine-green.vercel.app/](https://flowdesk-nine-green.vercel.app/)
+
+FlowDesk is an AI-assisted Kanban project management suite powered by Groq's Llama 3.1 free tier API (with full support for local hardware inferencing via Ollama).
 
 ## Description
 A Kanban board where AI scores your task priorities and tells you what to focus on. Built in a single HTML file. No npm, no build step, no paid API.
