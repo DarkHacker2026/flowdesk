@@ -883,25 +883,17 @@
             "Finally, a smart task manager.", "Beautifully engineered.", "Top tier product."
         ];
         
-        const authors = [
-            "@prakash_dev · Product Lead", "@s_miriam · Founder", "@alex_codes · Engineer",
-            "@design_ninja · UX Designer", "@sarah_ships · CEO", "@john_doer · VP Product",
-            "@tech_guru · CTO", "@startup_steve · Maker"
-        ];
-        
         const colors = ["#a78bfa", "#60a5fa", "#ec4899"];
         const starsSVG = '<svg viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>';
 
         function createReviewCard(text, i) {
-            const author = authors[i % authors.length];
             const color = colors[i % colors.length];
             const card = document.createElement('div');
             card.className = 'review-card glass-panel';
             card.style.borderLeftColor = color;
             card.innerHTML = `
                 <div class="stars mb-3">${starsSVG.repeat(5)}</div>
-                <p class="text-sm text-gray-200 mb-4 font-medium">"${text}"</p>
-                <div class="text-xs text-muted">${author}</div>
+                <p class="text-sm text-gray-200 mb-0 font-medium">"${text}"</p>
             `;
             return card;
         }
